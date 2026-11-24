@@ -67,9 +67,21 @@ def _boot_comfy_bg() -> None:
         ]
         if config.COMFY_DISABLE_PINNED_MEMORY:
             comfy_args.append("--disable-pinned-memory")
+        # Put this worker's src/ dir on the subprocess's PYTHONPATH so
+        # Python auto-imports src/sitecustomize.py inside ComfyUI's
+        # interpreter at startup — that is where the cuDNN SDPA opt-out
+        # lives (see that file for why). Without it, Qwen-Image 2.1
+        # sampling dies in attention on this torch/cuDNN stack.
+        comfy_env = dict(os.environ)
+        src_dir = os.path.dirname(os.path.abspath(__file__))
+        existing_pp = comfy_env.get("PYTHONPATH")
+        comfy_env["PYTHONPATH"] = (
+            src_dir + os.pathsep + existing_pp if existing_pp else src_dir
+        )
         _comfy_process = subprocess.Popen(
             comfy_args,
             cwd=config.COMFY_DIR,
+            env=comfy_env,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
