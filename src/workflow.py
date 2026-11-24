@@ -82,6 +82,11 @@ def build_workflow(
         "clip": ["clip_loader", 0],
         "prompt": prompt,
         "negative_prompt": negative_prompt,
+        # TextEncodeQwenImage21's resolution input is required in API
+        # format even for text-to-image (validation rejects the graph
+        # without it). It only resizes reference images, so with no
+        # references it is unused — but it must be present.
+        "resolution": edit_resolution,
     }
     if image_name is not None:
         nodes["load_image"] = {
@@ -89,7 +94,6 @@ def build_workflow(
             "inputs": {"image": image_name},
         }
         encode_inputs["vae"] = ["vae_loader", 0]
-        encode_inputs["resolution"] = edit_resolution
         encode_inputs["images.image_1"] = ["load_image", 0]
         latent_ref = ["encode", 2]
     else:
