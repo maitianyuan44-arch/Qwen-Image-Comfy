@@ -177,3 +177,5 @@ Same flow as the H3 / R2V endpoints:
   descriptive prompt is passed to the edit graph as-is. It behaves as
   "regenerate this picture as described", not as a pixel-preserving
   img2img blend (denoise is fixed at 1.0, as in the template).
+
+ak
